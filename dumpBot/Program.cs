@@ -5,14 +5,25 @@ namespace dumpBot;
 
 internal class Program
 {
+    private static async Task SendToMultipleChatsAsync(ITelegramBotClient botClient, List<long> chatIds, string message)
+    {
+        foreach (var chatId in chatIds) await botClient.SendTextMessageAsync(chatId, message);
+    }
+
     private static void Main(string[] args)
     {
         var Client = new TelegramBotClient("6628402318:AAGVuvBaCQZxxR5MlK7arNzzSgB3uFBu9yc");
-        var chatId = -4037376004;
+        var chatIds = new List<long>
+        {
+            -1001765136934,
+            -4037376004
+        };
+
         Client.StartReceiving(Update, Error);
         var dataTime = DateTime.Now;
-        Client.SendTextMessageAsync(chatId,
+        SendToMultipleChatsAsync(Client, chatIds,
             "\ud83d\ude43Привіт пупсики! \n\ud83c\udfc3dumpBot увірвався в чат! \nЗапускаю івент банка матюків.\ud83e\udd2c За кожну лайку я повідомлятиму, що потрібно заплатити. \nЗібрані кошти в кінці тижня підуть на потреби ЗСУ.\ud83e\udee1 \nКому донатити оприділимо разом. Слава Україні!");
+
         Console.WriteLine("dumpBot запущено");
         Console.ReadLine();
     }
@@ -31,7 +42,7 @@ internal class Program
                     var chatId = message.Chat.Id;
                     await botClient.SendTextMessageAsync(chatId, $"ID цієї групи: {chatId}");
                 }
-                
+
                 if (message.Text.ToLower().Contains("/ping"))
                     await botClient.SendTextMessageAsync(
                         message.Chat.Id,
@@ -46,7 +57,7 @@ internal class Program
                         "Привіт пупсик",
                         replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
                     );
-                
+
                 if (message.Text.ToLower().Contains("путін"))
                     await botClient.SendTextMessageAsync(
                         message.Chat.Id,
@@ -55,14 +66,15 @@ internal class Program
                     );
             }
 
-            string[] dirtyWords = { "блять", "сука", "бля", "хуйня", "підор", "хуйло", "йобана", "пздц" };
+            string[] dirtyWords =
+                { "блять", "сука", "бля", "хуйня", "підор", "хуйло", "йобана", "пздц", "єбана", "єбаний", "нахуй" };
             if (message != null && message.Text != null && message.Chat != null)
                 foreach (var Word in dirtyWords)
                     if (message.Text.ToLower().Contains(Word))
                     {
                         await botClient.SendTextMessageAsync(
                             message.Chat.Id,
-                            "За лайку плати в копілку.\ud83d\udcb0 \n\ud83e\udd2c1 брудне слово = 10 грн. \nАбо 20 віджимань на камеру.\ud83c\udfcb\ufe0f\u200d\u2640\ufe0f \nРеквізити банки: *********** ",
+                            "За лайку плати в копілку.\ud83d\udcb0 \n\ud83e\udd2c1 брудне слово = 10 грн. \nАбо 20 віджимань.\ud83c\udfcb\ufe0f\u200d\u2640\ufe0f \nПосилання на банку: https://send.monobank.ua/jar/6jstPnFA7M",
                             replyToMessageId: messageToReplyTo); // Вказуємо ID повідомлення, на яке відповідаємо
                         break; // Вийти з циклу, коли знайдено співпадіння
                     }
@@ -74,9 +86,12 @@ internal class Program
         Console.WriteLine($"Помилка: {error.Message}");
 
         // Отримати chat_id чату, в який ви хочете відправити повідомлення про помилку
-        var chatId = -4037376004;
+        var chatIds = new List<long>
+        {
+            -1001765136934,
+            -4037376004
+        };
 
-        // Відправити повідомлення про помилку в чат
-        await botClient.SendTextMessageAsync(chatId, $"Помилка: {error.Message}");
+        foreach (var chatId in chatIds) await botClient.SendTextMessageAsync(chatId, $"Помилка: {error.Message}");
     }
 }
