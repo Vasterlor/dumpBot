@@ -46,6 +46,13 @@ internal class Program
                         "Привіт пупсик",
                         replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
                     );
+                
+                if (message.Text.ToLower().Contains("путін"))
+                    await botClient.SendTextMessageAsync(
+                        message.Chat.Id,
+                        "Безспорно хуйло",
+                        replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
+                    );
             }
 
             string[] dirtyWords = { "блять", "сука", "бля", "хуйня", "підор", "хуйло", "йобана", "пздц" };
@@ -55,7 +62,7 @@ internal class Program
                     {
                         await botClient.SendTextMessageAsync(
                             message.Chat.Id,
-                            "За лайку плати в копілку.\ud83d\udcb0 \n\ud83e\udd2c1 брудне слово = 1 грн. \nРеквізити банки: ***********",
+                            "За лайку плати в копілку.\ud83d\udcb0 \n\ud83e\udd2c1 брудне слово = 10 грн. \nАбо 20 віджимань на камеру.\ud83c\udfcb\ufe0f\u200d\u2640\ufe0f \nРеквізити банки: *********** ",
                             replyToMessageId: messageToReplyTo); // Вказуємо ID повідомлення, на яке відповідаємо
                         break; // Вийти з циклу, коли знайдено співпадіння
                     }
