@@ -1,4 +1,5 @@
-﻿using Telegram.Bot;
+﻿using System.Text.RegularExpressions;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace dumpBot;
@@ -15,14 +16,14 @@ internal class Program
         var Client = new TelegramBotClient("6628402318:AAGVuvBaCQZxxR5MlK7arNzzSgB3uFBu9yc");
         var chatIds = new List<long>
         {
-            -1001765136934,
-            -4037376004
+            -1001765136934, // naPivch
+            -4037376004 // dampTest
         };
 
         Client.StartReceiving(Update, Error);
         var dataTime = DateTime.Now;
         SendToMultipleChatsAsync(Client, chatIds,
-            "\ud83d\ude43Привіт пупсики! \n\ud83c\udfc3dumpBot увірвався в чат! \nЗапускаю івент банка матюків.\ud83e\udd2c За кожну лайку я повідомлятиму, що потрібно заплатити. \nЗібрані кошти в кінці тижня підуть на потреби ЗСУ.\ud83e\udee1 \nКому донатити оприділимо разом. Слава Україні!");
+            "\ud83d\ude43Привіт пупсики! \n\ud83c\udfc3dumpBot увірвався в чат! \nЗапускаю івент банка матюків.\ud83e\udd2c За кожну лайку я повідомлятиму, що потрібно заплатити. \nЗібрані кошти в кінці тижня підуть на потреби ЗСУ.\ud83e\udee1 \nКому донатити оприділимо разом. \n/help - довідник команд. \nСлава Україні!");
 
         Console.WriteLine("dumpBot запущено");
         Console.ReadLine();
@@ -30,6 +31,10 @@ internal class Program
 
     private static async Task Update(ITelegramBotClient botClient, Update update, CancellationToken token)
     {
+        if (update == null)
+            // Перевіряємо, чи update не є null.
+            return;
+
         var message = update.Message;
         if (message != null)
         {
@@ -66,18 +71,74 @@ internal class Program
                     );
             }
 
-            string[] dirtyWords =
-                { "блять", "сука", "бля", "хуйня", "підор", "хуйло", "йобана", "пздц", "єбана", "єбаний", "нахуй" };
             if (message != null && message.Text != null && message.Chat != null)
-                foreach (var Word in dirtyWords)
-                    if (message.Text.ToLower().Contains(Word))
+            {
+                // Оголошення ініціалізованого словника поза циклом
+                var wordsAndPositions = new Dictionary<string, List<int>>();
+                var totalDirtyWordsCount = 0;
+                string[] dirtyWords =
+                {
+                    "блять", "сука", "бля", "хуйня", "підор", "хуйло", "йобана", "пздц", "єбана", "єбаний", "нахуй",
+                    "хуй", "пизда"
+                };
+                var price = 10;
+                var numberPushUps = 20;
+
+                foreach (var word in dirtyWords)
+                {
+                    var pattern = $@"\b{Regex.Escape(word)}\b"; // Створення регулярного виразу для пошуку цілого слова
+                    var matches = Regex.Matches(message.Text, pattern, RegexOptions.IgnoreCase);
+
+                    if (matches.Count > 0)
                     {
-                        await botClient.SendTextMessageAsync(
-                            message.Chat.Id,
-                            "За лайку плати в копілку.\ud83d\udcb0 \n\ud83e\udd2c1 брудне слово = 10 грн. \nАбо 20 віджимань.\ud83c\udfcb\ufe0f\u200d\u2640\ufe0f \nПосилання на банку: https://send.monobank.ua/jar/6jstPnFA7M",
-                            replyToMessageId: messageToReplyTo); // Вказуємо ID повідомлення, на яке відповідаємо
-                        break; // Вийти з циклу, коли знайдено співпадіння
+                        if (!wordsAndPositions.ContainsKey(word)) wordsAndPositions[word] = new List<int>();
+
+                        foreach (Match match in
+                                 matches) wordsAndPositions[word].Add(match.Index); // Збережіть позиції знайдених слів
+                        totalDirtyWordsCount += matches.Count;
                     }
+                }
+
+                if (wordsAndPositions.Count > 0)
+                {
+                    // Побудова текстового рядка на основі словника
+                    var responseText = "За лайку плати в копілку.💰\nВ данмоу повідомленні використали брудні слова:";
+
+                    foreach (var kvp in wordsAndPositions) responseText += $"\n{kvp.Key}: {kvp.Value.Count} шт.";
+                    responseText += $"\n\nЗагальна кількість брудних слів: {totalDirtyWordsCount}\ud83d\ude33\n";
+                    responseText +=
+                        "\n1 брудне слово = 10 грн.\ud83d\udcb5\nАбо 20 віджимань.🏋️‍♀️\n\nСловом ти попав на: " +
+                        totalDirtyWordsCount * price + " грн, або " + totalDirtyWordsCount * numberPushUps +
+                        " віджимань\ud83d\ude05" + "\nПосилання на банку: https://send.monobank.ua/jar/6jstPnFA7M";
+
+                    await botClient.SendTextMessageAsync(
+                        message.Chat.Id,
+                        responseText,
+                        replyToMessageId: messageToReplyTo);
+                }
+
+
+                if (message.Text != null && message.Text.ToLower().Contains("/dirtywords"))
+                {
+                    var dirtyWordsList = string.Join(", ", dirtyWords);
+                    await botClient.SendTextMessageAsync(
+                        message.Chat.Id,
+                        "Словник брудних слів (НЕ ЧИТАТИ В ГОЛОС): \n" + dirtyWordsList,
+                        replyToMessageId: messageToReplyTo
+                    );
+                }
+
+                //команда /help - відправляє повідомлення із списком команд 
+                if (message.Text != null && message.Text.ToLower().Contains("/help"))
+                    await botClient.SendTextMessageAsync(
+                        message.Chat.Id,
+                        "Я dumpBot і я знаю команди:" +
+                        "\n/chatid - показує id даного чату" +
+                        "\n/ping - перевірка чи бот активний в чаті" +
+                        "\n/dirtyWords - виводить словник брудних слів",
+                        replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
+                    );
+            }
         }
     }
 
@@ -88,8 +149,8 @@ internal class Program
         // Отримати chat_id чату, в який ви хочете відправити повідомлення про помилку
         var chatIds = new List<long>
         {
-            -1001765136934,
-            -4037376004
+            -1001765136934, // naPivch
+            -4037376004 // dampTest
         };
 
         foreach (var chatId in chatIds) await botClient.SendTextMessageAsync(chatId, $"Помилка: {error.Message}");
