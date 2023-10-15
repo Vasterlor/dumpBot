@@ -1,5 +1,4 @@
-﻿using System.Net.Mime;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -7,6 +6,8 @@ namespace dumpBot;
 
 internal class Program
 {
+    private static readonly ChatUsers chatUsers = new();
+
     //мультічат і обробка помилок при відправленні повідомлень в різні чати
     private static async Task SendToMultipleChatsAsync(ITelegramBotClient botClient, List<long> chatIds, string message)
     {
@@ -26,9 +27,20 @@ internal class Program
         var Client = new TelegramBotClient("6628402318:AAGVuvBaCQZxxR5MlK7arNzzSgB3uFBu9yc");
         var chatIds = new List<long>
         {
-            -1001765136934 // naPivch
+            -1001765136934, // naPivch
             -1001902063585 // dampTest
         };
+
+        // Додавання користувачів до словників для різних чатів
+        chatUsers.DampTestUsers.Add(1, "@sashakuzo");
+        chatUsers.DampTestUsers.Add(2, "@tod993");
+        chatUsers.NaPivchUsers.Add(1, "@sashakuzo");
+        chatUsers.NaPivchUsers.Add(2, "@hroshko_p");
+        chatUsers.NaPivchUsers.Add(3, "@t.me/roonua1");
+        chatUsers.NaPivchUsers.Add(4, "@Healermanrober");
+        chatUsers.NaPivchUsers.Add(5, "@Kostya");
+        chatUsers.NaPivchUsers.Add(6, "@Рузана");
+        chatUsers.NaPivchUsers.Add(7, "@iamfuss");
 
         Client.StartReceiving(Update, Error);
         var dataTime = DateTime.Now;
@@ -64,6 +76,41 @@ internal class Program
                         "Я все ще тут",
                         replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
                     );
+                
+                // /traitor рандомний пошук юзера із 
+                if (message.Text.ToLower().Contains("/traitor"))
+                {
+                    var random = new Random();
+
+                    if (message.Chat.Id == -1001902063585) // dampTest
+                    {
+                        var userCount = chatUsers.DampTestUsers.Count;
+                        if (userCount > 0)
+                        {
+                            var randomUserId = random.Next(1, userCount + 1);
+                            if (chatUsers.DampTestUsers.TryGetValue(randomUserId, out var randomUser))
+                                await botClient.SendTextMessageAsync(
+                                    message.Chat.Id,
+                                    "Зрадник: " + randomUser,
+                                    replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
+                                );
+                        }
+                    }
+                    else if (message.Chat.Id == -1001765136934) // naPivch
+                    {
+                        var userCount = chatUsers.NaPivchUsers.Count;
+                        if (userCount > 0)
+                        {
+                            var randomUserId = random.Next(1, userCount + 1);
+                            if (chatUsers.NaPivchUsers.TryGetValue(randomUserId, out var randomUser))
+                                await botClient.SendTextMessageAsync(
+                                    message.Chat.Id,
+                                    "Зрадник: " + randomUser,
+                                    replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
+                                );
+                        }
+                    }
+                }
 
                 // Привітання
                 if (message.Text.ToLower().Contains("привіт"))
@@ -162,7 +209,8 @@ internal class Program
                             "Я dumpBot і я знаю команди:" +
                             "\n/chatid - показує id даного чату" +
                             "\n/ping - перевірка чи бот активний в чаті" +
-                            "\n/dirtyWords - виводить словник брудних слів",
+                            "\n/dirtyWords - виводить словник брудних слів" +
+                            "\n/traitor - хто зрадник",
                             replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
                         );
                 }
@@ -182,5 +230,11 @@ internal class Program
         };
 
         foreach (var chatId in chatIds) await botClient.SendTextMessageAsync(chatId, $"Помилка: {error.Message}");
+    }
+
+    private class ChatUsers
+    {
+        public Dictionary<int, string> DampTestUsers { get; } = new();
+        public Dictionary<int, string> NaPivchUsers { get; } = new();
     }
 }
