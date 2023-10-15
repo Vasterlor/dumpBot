@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Net.Mime;
+using System.Text.RegularExpressions;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -6,9 +7,18 @@ namespace dumpBot;
 
 internal class Program
 {
+    //мультічат і обробка помилок при відправленні повідомлень в різні чати
     private static async Task SendToMultipleChatsAsync(ITelegramBotClient botClient, List<long> chatIds, string message)
     {
-        foreach (var chatId in chatIds) await botClient.SendTextMessageAsync(chatId, message);
+        foreach (var chatId in chatIds)
+            try
+            {
+                await botClient.SendTextMessageAsync(chatId, message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Помилка при відправленні в чат {chatId}: {ex.Message}");
+            }
     }
 
     private static void Main(string[] args)
@@ -16,8 +26,8 @@ internal class Program
         var Client = new TelegramBotClient("6628402318:AAGVuvBaCQZxxR5MlK7arNzzSgB3uFBu9yc");
         var chatIds = new List<long>
         {
-            -1001765136934, // naPivch
-            -4037376004 // dampTest
+            -1001765136934 // naPivch
+            -1001902063585 // dampTest
         };
 
         Client.StartReceiving(Update, Error);
@@ -25,7 +35,7 @@ internal class Program
         SendToMultipleChatsAsync(Client, chatIds,
             "\ud83d\ude43Привіт пупсики! \n\ud83c\udfc3dumpBot увірвався в чат! \nЗапускаю івент банка матюків.\ud83e\udd2c За кожну лайку я повідомлятиму, що потрібно заплатити. \nЗібрані кошти в кінці тижня підуть на потреби ЗСУ.\ud83e\udee1 \nКому донатити оприділимо разом. \n/help - довідник команд. \nСлава Україні!");
 
-        Console.WriteLine("dumpBot запущено");
+        Console.WriteLine(DateTime.Now + " - dumpBot запущено");
         Console.ReadLine();
     }
 
@@ -73,74 +83,89 @@ internal class Program
 
             if (message != null && message.Text != null && message.Chat != null)
             {
-                // Оголошення ініціалізованого словника поза циклом
-                var wordsAndPositions = new Dictionary<string, List<int>>();
-                var totalDirtyWordsCount = 0;
-                string[] dirtyWords =
-                {
-                    "блять", "бля", "блядина", "блядіна", "ублюдок", "хуй", "хур", "ахує", "охуї", "охуїваю", "хуйня",
-                    "хуйло", "нахуй", "підор", "йобана", "єбана", "єбати", "єбаний", "їбати", "їбаний",
-                    "пизда", "пізда", "пиздець", "піздєц", "пздц", "пиздеж", "пиздежа", "мудло", "мудак", "сука",
-                    "сучка", "сучара", "конча", "кончений", "кончена", "мудило", "мудак", "мудло", "курва", "курвище",
-                    "курвий", "курви"
-                };
-                var price = 10;
-                var numberPushUps = 20;
+                string[] ignoredWords = { "Конча-" };
 
-                foreach (var word in dirtyWords)
-                {
-                    var pattern = $@"\b{Regex.Escape(word)}\b"; // Створення регулярного виразу для пошуку цілого слова
-                    var matches = Regex.Matches(message.Text, pattern, RegexOptions.IgnoreCase);
+                // Перевірте, чи повідомлення містить ігноровані слова або фрази
+                var shouldIgnoreMessage =
+                    ignoredWords.Any(word => message.Text.Contains(word, StringComparison.OrdinalIgnoreCase));
 
-                    if (matches.Count > 0)
+                if (!shouldIgnoreMessage)
+                {
+                    // Оголошення ініціалізованого словника поза циклом
+                    var wordsAndPositions = new Dictionary<string, List<int>>();
+                    var totalDirtyWordsCount = 0;
+                    string[] dirtyWords =
                     {
-                        if (!wordsAndPositions.ContainsKey(word)) wordsAndPositions[word] = new List<int>();
+                        "блять", "бля", "блядина", "блядіна", "ублюдок", "хуй", "хур", "ахує", "охуї", "охуїваю",
+                        "хуйня",
+                        "хуйло", "нахуй", "підор", "йобаний", "хуєфікатор", "йобана", "єбана", "єбати", "єбаний",
+                        "їбати", "їбаний",
+                        "пизда", "пізда", "пиздець", "піздєц", "пздц", "пиздеж", "пиздежа", "мудло", "мудак", "сука",
+                        "сучка", "сучара", "конча", "кончений", "кончена", "мудило", "мудак", "мудло", "курва",
+                        "курвище",
+                        "курвий", "курви"
+                    };
+                    var price = 10;
+                    var numberPushUps = 20;
 
-                        foreach (Match match in
-                                 matches) wordsAndPositions[word].Add(match.Index); // Збережіть позиції знайдених слів
-                        totalDirtyWordsCount += matches.Count;
+                    foreach (var word in dirtyWords)
+                    {
+                        var pattern =
+                            $@"\b{Regex.Escape(word)}\b"; // Створення регулярного виразу для пошуку цілого слова
+                        var matches = Regex.Matches(message.Text, pattern, RegexOptions.IgnoreCase);
+
+                        if (matches.Count > 0)
+                        {
+                            if (!wordsAndPositions.ContainsKey(word)) wordsAndPositions[word] = new List<int>();
+
+                            foreach (Match match in
+                                     matches)
+                                wordsAndPositions[word].Add(match.Index); // Збережіть позиції знайдених слів
+                            totalDirtyWordsCount += matches.Count;
+                        }
                     }
+
+                    if (wordsAndPositions.Count > 0)
+                    {
+                        // Побудова текстового рядка на основі словника
+                        var responseText =
+                            "За лайку плати в копілку.💰\nВ данмоу повідомленні використали брудні слова:";
+
+                        foreach (var kvp in wordsAndPositions) responseText += $"\n{kvp.Key}: {kvp.Value.Count} шт.";
+                        responseText += $"\n\nЗагальна кількість брудних слів: {totalDirtyWordsCount}\ud83d\ude33\n";
+                        responseText +=
+                            "\n1 брудне слово = 10 грн.\ud83d\udcb5\nАбо 20 віджимань.🏋️‍♀️\n\nСловом ти попав на: " +
+                            totalDirtyWordsCount * price + " грн, або " + totalDirtyWordsCount * numberPushUps +
+                            " віджимань\ud83d\ude05" + "\nПосилання на банку: https://send.monobank.ua/jar/6jstPnFA7M";
+
+                        await botClient.SendTextMessageAsync(
+                            message.Chat.Id,
+                            responseText,
+                            replyToMessageId: messageToReplyTo);
+                    }
+
+
+                    if (message.Text != null && message.Text.ToLower().Contains("/dirtywords"))
+                    {
+                        var dirtyWordsList = string.Join(", ", dirtyWords);
+                        await botClient.SendTextMessageAsync(
+                            message.Chat.Id,
+                            "Словник брудних слів (НЕ ЧИТАТИ В ГОЛОС): \n" + dirtyWordsList,
+                            replyToMessageId: messageToReplyTo
+                        );
+                    }
+
+                    //команда /help - відправляє повідомлення із списком команд 
+                    if (message.Text != null && message.Text.ToLower().Contains("/help"))
+                        await botClient.SendTextMessageAsync(
+                            message.Chat.Id,
+                            "Я dumpBot і я знаю команди:" +
+                            "\n/chatid - показує id даного чату" +
+                            "\n/ping - перевірка чи бот активний в чаті" +
+                            "\n/dirtyWords - виводить словник брудних слів",
+                            replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
+                        );
                 }
-
-                if (wordsAndPositions.Count > 0)
-                {
-                    // Побудова текстового рядка на основі словника
-                    var responseText = "За лайку плати в копілку.💰\nВ данмоу повідомленні використали брудні слова:";
-
-                    foreach (var kvp in wordsAndPositions) responseText += $"\n{kvp.Key}: {kvp.Value.Count} шт.";
-                    responseText += $"\n\nЗагальна кількість брудних слів: {totalDirtyWordsCount}\ud83d\ude33\n";
-                    responseText +=
-                        "\n1 брудне слово = 10 грн.\ud83d\udcb5\nАбо 20 віджимань.🏋️‍♀️\n\nСловом ти попав на: " +
-                        totalDirtyWordsCount * price + " грн, або " + totalDirtyWordsCount * numberPushUps +
-                        " віджимань\ud83d\ude05" + "\nПосилання на банку: https://send.monobank.ua/jar/6jstPnFA7M";
-
-                    await botClient.SendTextMessageAsync(
-                        message.Chat.Id,
-                        responseText,
-                        replyToMessageId: messageToReplyTo);
-                }
-
-
-                if (message.Text != null && message.Text.ToLower().Contains("/dirtywords"))
-                {
-                    var dirtyWordsList = string.Join(", ", dirtyWords);
-                    await botClient.SendTextMessageAsync(
-                        message.Chat.Id,
-                        "Словник брудних слів (НЕ ЧИТАТИ В ГОЛОС): \n" + dirtyWordsList,
-                        replyToMessageId: messageToReplyTo
-                    );
-                }
-
-                //команда /help - відправляє повідомлення із списком команд 
-                if (message.Text != null && message.Text.ToLower().Contains("/help"))
-                    await botClient.SendTextMessageAsync(
-                        message.Chat.Id,
-                        "Я dumpBot і я знаю команди:" +
-                        "\n/chatid - показує id даного чату" +
-                        "\n/ping - перевірка чи бот активний в чаті" +
-                        "\n/dirtyWords - виводить словник брудних слів",
-                        replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
-                    );
             }
         }
     }
@@ -153,7 +178,7 @@ internal class Program
         var chatIds = new List<long>
         {
             -1001765136934, // naPivch
-            -4037376004 // dampTest
+            -1001902063585 // dampTest
         };
 
         foreach (var chatId in chatIds) await botClient.SendTextMessageAsync(chatId, $"Помилка: {error.Message}");
