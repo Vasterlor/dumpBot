@@ -3,13 +3,13 @@
 {
     public Dictionary<int, string> DumpTestUsers { get; } = new();
     public Dictionary<int, string> NaPivchUsers { get; } = new();
-    
+
 }*/
 
 public class ChatUsers
 {
-    public Dictionary<int, string> DumpTestUsers { get; } = new Dictionary<int, string>();
-    public Dictionary<int, string> NaPivchUsers { get; } = new Dictionary<int, string>();
+    public Dictionary<int, string> DumpTestUsers { get; } = new();
+    public Dictionary<int, string> NaPivchUsers { get; } = new();
     private int lastAssignedDumpTestNumber = 0;
     private int lastAssignedNaPivchNumber = 0;
 
@@ -27,6 +27,3 @@ public class ChatUsers
         NaPivchUsers.Add(lastAssignedNaPivchNumber, username);
     }
 }
-
-
-
