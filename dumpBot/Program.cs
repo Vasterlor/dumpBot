@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using dumpBot.Users;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -6,7 +7,9 @@ namespace dumpBot;
 
 internal class Program
 {
-    private static readonly ChatUsers chatUsers = new();
+    private static ChatUsers chatUsers = new();
+    private static UserNameDumpTest userNameDumpTest = new();
+    private static UserNameNaPivch userNameNaPivch = new();
 
     //мультічат і обробка помилок при відправленні повідомлень в різні чати
     private static async Task SendToMultipleChatsAsync(ITelegramBotClient botClient, List<long> chatIds, string message)
@@ -30,29 +33,32 @@ internal class Program
             -1001765136934, // naPivch
             -1001902063585 // dampTest
         };
+        //DumpTestUsers
+        chatUsers.AddDumpTestUser(userNameDumpTest.sashakuzo);
+        chatUsers.AddDumpTestUser(userNameDumpTest.tod993);
 
-        // Додавання користувачів до словників для різних чатів
-        chatUsers.DampTestUsers.Add(1, "@sashakuzo");
-        chatUsers.DampTestUsers.Add(2, "@tod993");
-        chatUsers.NaPivchUsers.Add(1, "@sashakuzo");
-        chatUsers.NaPivchUsers.Add(2, "@hroshko_p");
-        chatUsers.NaPivchUsers.Add(3, "@roonua1");
-        chatUsers.NaPivchUsers.Add(4, "@Healermanrober");
-        chatUsers.NaPivchUsers.Add(5, "@Kostya");
-        chatUsers.NaPivchUsers.Add(6, "@Рузана");
-        chatUsers.NaPivchUsers.Add(7, "@iamfuss");
+        //NaPivchUsers
+        chatUsers.AddNaPivchUser(userNameNaPivch.sashakuzo);
+        chatUsers.AddNaPivchUser(userNameNaPivch.hroshko_p);
+        chatUsers.AddNaPivchUser(userNameNaPivch.roonua1);
+        chatUsers.AddNaPivchUser(userNameNaPivch.Healermanrober);
+        chatUsers.AddNaPivchUser(userNameNaPivch.Kostya);
+        chatUsers.AddNaPivchUser(userNameNaPivch.Рузана);
+        chatUsers.AddNaPivchUser(userNameNaPivch.iamfuss);
+
 
         Client.StartReceiving(Update, Error);
-        var dataTime = DateTime.Now;
+        var startDataTime = DateTime.Now;
         SendToMultipleChatsAsync(Client, chatIds,
             "\ud83d\ude43Привіт пупсики! \n\ud83c\udfc3dumpBot увірвався в чат! \nЗапускаю івент банка матюків.\ud83e\udd2c За кожну лайку я повідомлятиму, що потрібно заплатити. \nЗібрані кошти в кінці тижня підуть на потреби ЗСУ.\ud83e\udee1 \nКому донатити оприділимо разом. \n/help - довідник команд. \nСлава Україні!");
 
-        Console.WriteLine(DateTime.Now + " - dumpBot запущено");
+        Console.WriteLine(startDataTime + " - dumpBot запущено");
         Console.ReadLine();
     }
 
     private static async Task Update(ITelegramBotClient botClient, Update update, CancellationToken token)
     {
+        var bankaUrl = "https://send.monobank.ua/jar/6jstPnFA7M";
         if (update == null)
             // Перевіряємо, чи update не є null.
             return;
@@ -77,6 +83,13 @@ internal class Program
                         replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
                     );
 
+                if (message.Text.ToLower().Contains("/banka"))
+                    await botClient.SendTextMessageAsync(
+                        message.Chat.Id,
+                        "Посилання на банку: " + bankaUrl,
+                        replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
+                    );
+
                 // /traitor рандомний пошук юзера із 
                 if (message.Text.ToLower().Contains("/traitor"))
                 {
@@ -84,11 +97,11 @@ internal class Program
 
                     if (message.Chat.Id == -1001902063585) // dampTest
                     {
-                        var userCount = chatUsers.DampTestUsers.Count;
+                        var userCount = chatUsers.DumpTestUsers.Count;
                         if (userCount > 0)
                         {
                             var randomUserId = random.Next(1, userCount + 1);
-                            if (chatUsers.DampTestUsers.TryGetValue(randomUserId, out var randomUser))
+                            if (chatUsers.DumpTestUsers.TryGetValue(randomUserId, out var randomUser))
                                 await botClient.SendTextMessageAsync(
                                     message.Chat.Id,
                                     "Зрадник: " + randomUser,
@@ -143,7 +156,8 @@ internal class Program
                     var totalDirtyWordsCount = 0;
                     string[] dirtyWords =
                     {
-                        "блять", "блядь", "бля", "блядина", "блядіна", "ублюдок", "хуй", "хуйот", "хер", "ніхера", "нихера",
+                        "блять", "блядь", "бля", "блядина", "блядіна", "ублюдок", "хуй", "хуйот", "хер", "ніхера",
+                        "нихера",
                         "ахує", "охуї", "охуїв", "охуїваю",
                         "хуйня",
                         "хуйло", "нахуй", "хуєсос", "підор", "підар", "підарам", "йобаний", "хуєфікатор", "йобана",
@@ -186,7 +200,7 @@ internal class Program
                         responseText +=
                             "\n1 брудне слово = 10 грн.\ud83d\udcb5\nАбо 20 віджимань.🏋️‍♀️\n\nСловом ти попав на: " +
                             totalDirtyWordsCount * price + " грн, або " + totalDirtyWordsCount * numberPushUps +
-                            " віджимань\ud83d\ude05" + "\nПосилання на банку: https://send.monobank.ua/jar/6jstPnFA7M";
+                            " віджимань\ud83d\ude05" + "\nПосилання на \ud83e\uded9: " + bankaUrl;
 
                         await botClient.SendTextMessageAsync(
                             message.Chat.Id,
@@ -210,10 +224,11 @@ internal class Program
                         await botClient.SendTextMessageAsync(
                             message.Chat.Id,
                             "Я dumpBot і я знаю команди:" +
-                            "\n/chatid - показує id даного чату" +
-                            "\n/ping - перевірка чи бот активний в чаті" +
-                            "\n/dirtyWords - виводить словник брудних слів" +
-                            "\n/traitor - хто зрадник",
+                            "\n/chatid - показую id даного чату" +
+                            "\n/ping - перевіряю чи бот активний в чаті" +
+                            "\n/dirtyWords - показую словник брудних слів" +
+                            "\n/traitor - знаходжу зрадника" +
+                            "\n/banka - повідомляю посилання на банку",
                             replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
                         );
                 }
@@ -233,11 +248,5 @@ internal class Program
         };
 
         foreach (var chatId in chatIds) await botClient.SendTextMessageAsync(chatId, $"Помилка: {error.Message}");
-    }
-
-    private class ChatUsers
-    {
-        public Dictionary<int, string> DampTestUsers { get; } = new();
-        public Dictionary<int, string> NaPivchUsers { get; } = new();
     }
 }
