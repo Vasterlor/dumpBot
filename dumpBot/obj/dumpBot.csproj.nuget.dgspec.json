@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "F:\\Особисте\\dumpBot\\dumpBot\\dumpBot\\dumpBot.csproj": {}
+    "F:\\Особисте\\TelegramBots\\dumpBot\\dumpBot\\dumpBot.csproj": {}
   },
   "projects": {
-    "F:\\Особисте\\dumpBot\\dumpBot\\dumpBot\\dumpBot.csproj": {
+    "F:\\Особисте\\TelegramBots\\dumpBot\\dumpBot\\dumpBot.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Особисте\\dumpBot\\dumpBot\\dumpBot\\dumpBot.csproj",
+        "projectUniqueName": "F:\\Особисте\\TelegramBots\\dumpBot\\dumpBot\\dumpBot.csproj",
         "projectName": "dumpBot",
-        "projectPath": "F:\\Особисте\\dumpBot\\dumpBot\\dumpBot\\dumpBot.csproj",
+        "projectPath": "F:\\Особисте\\TelegramBots\\dumpBot\\dumpBot\\dumpBot.csproj",
         "packagesPath": "C:\\Users\\sasha\\.nuget\\packages\\",
-        "outputPath": "F:\\Особисте\\dumpBot\\dumpBot\\dumpBot\\obj\\",
+        "outputPath": "F:\\Особисте\\TelegramBots\\dumpBot\\dumpBot\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\sasha\\AppData\\Roaming\\NuGet\\NuGet.Config",

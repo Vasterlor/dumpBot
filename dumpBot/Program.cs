@@ -30,7 +30,7 @@ internal class Program
         var Client = new TelegramBotClient("6628402318:AAGVuvBaCQZxxR5MlK7arNzzSgB3uFBu9yc");
         var chatIds = new List<long>
         {
-            -1001765136934, // naPivch
+           // -1001765136934, // naPivch
             -1001902063585 // dampTest
         };
         //DumpTestUsers
@@ -82,6 +82,62 @@ internal class Program
                         "Я все ще тут",
                         replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
                     );
+
+                if (message.Text.ToLower().Contains("/roll"))
+                {
+                    Random rand = new Random();
+                    int number = rand.Next(1, 101);
+                    if (number < 10)
+                    {
+                        await botClient.SendTextMessageAsync(
+                            message.Chat.Id,
+                            text: "😂 " + Convert.ToString(number),
+                            replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
+                        );
+                    }
+                    else
+                    {
+                        await botClient.SendTextMessageAsync(
+                          message.Chat.Id,
+                          text: Convert.ToString(number),
+                          replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
+                        );
+                    }
+
+                }
+
+                if (message.Text.ToLower().Contains("/duel"))
+                {
+                    string stone = "🪨";
+                    string scissors = "✂️";
+                    string paper = "🧻";
+                    Random rand = new Random();
+                    int number = rand.Next(0, 3);
+                    if (number == 0)
+                    {
+                        await botClient.SendTextMessageAsync(
+                            message.Chat.Id,
+                            text: stone,
+                            replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
+                        );
+                    }
+                    else if (number == 1)
+                    {
+                        await botClient.SendTextMessageAsync(
+                        message.Chat.Id,
+                        text: scissors,
+                        replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
+                        );
+                    }
+                    else if (number == 2)
+                    {
+                        await botClient.SendTextMessageAsync(
+                        message.Chat.Id,
+                        text: paper,
+                        replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
+                        );
+                    }
+                }
 
                 if (message.Text.ToLower().Contains("/banka"))
                     await botClient.SendTextMessageAsync(
@@ -157,13 +213,13 @@ internal class Program
                     string[] dirtyWords =
                     {
                         "блять", "блядь", "бля", "блядина", "блядіна", "ублюдок", "хуй", "хуйот", "хер", "ніхера",
-                        "нихера",
-                        "ахує", "охуї", "охуїв", "охуїваю",
+                        "нихера", "похер", "похеру", "хуярять", "хуярить", "хуяритиме",
+                        "ахує", "охуї", "ахуї", "охуїв", "охуїваю",
                         "хуйня",
-                        "хуйло", "нахуй", "хуєсос", "підор", "підар", "підарам", "йобаний", "хуєфікатор", "йобана",
-                        "єбана", "єбати", "єбаний",
+                        "хуйло", "нахуй", "хуєсос", "підор", "підар", "підарам", "Пидарье", "Пидорье", "йобаний", "хуєфікатор", "йобана",
+                        "єбана", "єбати", "єбаний", "заєбав", "заїбав",
                         "їбати", "їбаний", "єбанько", "їбанько",
-                        "пизда", "пізда", "піздабол", "пиздабол", "пиздець", "піздєц", "пздц", "пиздеж", "пиздежа",
+                        "пизда", "пізда", "пізди", "пизди", "піздабол", "пиздабол", "пиздець", "піздєц", "пздц", "пиздеж", "пиздежа",
                         "мудло", "мудак", "сука",
                         "сучка", "сучара", "конча", "кончений", "кончена", "мудило", "мудак", "мудло", "курва",
                         "курвище",
@@ -228,13 +284,16 @@ internal class Program
                             "\n/ping - перевіряю чи бот активний в чаті" +
                             "\n/dirtyWords - показую словник брудних слів" +
                             "\n/traitor - знаходжу зрадника" +
-                            "\n/banka - повідомляю посилання на банку",
+                            "\n/banka - повідомляю посилання на банку" +
+                            "\n/roll - у кого більший той і прав" +
+                            "\n/duel - Камінь, ножникі, папір",
                             replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
                         );
                 }
             }
         }
     }
+
 
     private static async Task Error(ITelegramBotClient botClient, Exception error, CancellationToken arg3)
     {
@@ -243,7 +302,7 @@ internal class Program
         // Отримати chat_id чату, в який ви хочете відправити повідомлення про помилку
         var chatIds = new List<long>
         {
-            -1001765136934, // naPivch
+           // -1001765136934, // naPivch
             -1001902063585 // dampTest
         };
 
