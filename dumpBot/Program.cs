@@ -30,7 +30,7 @@ internal class Program
         var Client = new TelegramBotClient("6628402318:AAGVuvBaCQZxxR5MlK7arNzzSgB3uFBu9yc");
         var chatIds = new List<long>
         {
-           // -1001765136934, // naPivch
+            -1001765136934, // naPivch
             -1001902063585 // dampTest
         };
         //DumpTestUsers
@@ -302,7 +302,7 @@ internal class Program
         // Отримати chat_id чату, в який ви хочете відправити повідомлення про помилку
         var chatIds = new List<long>
         {
-           // -1001765136934, // naPivch
+            -1001765136934, // naPivch
             -1001902063585 // dampTest
         };
 
