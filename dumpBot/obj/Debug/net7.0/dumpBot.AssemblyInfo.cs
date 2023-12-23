@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("dumpBot")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6b515df1f2152dead301484d16bc6aab56f0ce80")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5a9bdbbd3f67d5ec11e1ff581c00e313aa77b031")]
 [assembly: System.Reflection.AssemblyProductAttribute("dumpBot")]
 [assembly: System.Reflection.AssemblyTitleAttribute("dumpBot")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
