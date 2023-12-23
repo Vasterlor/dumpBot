@@ -1,10 +1,4 @@
 ﻿namespace dumpBot;
-/*public class ChatUsers
-{
-    public Dictionary<int, string> DumpTestUsers { get; } = new();
-    public Dictionary<int, string> NaPivchUsers { get; } = new();
-
-}*/
 
 public class ChatUsers
 {
