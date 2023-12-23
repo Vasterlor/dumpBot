@@ -10,6 +10,8 @@ internal class Program
     private static ChatUsers chatUsers = new();
     private static UserNameDumpTest userNameDumpTest = new();
     private static UserNameNaPivch userNameNaPivch = new();
+    private static readonly Chats Chats = new();
+
 
     //мультічат і обробка помилок при відправленні повідомлень в різні чати
     private static async Task SendToMultipleChatsAsync(ITelegramBotClient botClient, List<long> chatIds, string message)
@@ -30,8 +32,8 @@ internal class Program
         var Client = new TelegramBotClient("6628402318:AAGVuvBaCQZxxR5MlK7arNzzSgB3uFBu9yc");
         var chatIds = new List<long>
         {
-             -1001765136934, // naPivch
-             -1001902063585 // dampTest
+            Chats.dampTest,
+            Chats.naPivch
         };
         //DumpTestUsers
         chatUsers.AddDumpTestUser(userNameDumpTest.sashakuzo);
@@ -146,12 +148,46 @@ internal class Program
                         replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
                     );
 
+                if (message.Text.ToLower().StartsWith("/word"))
+                {
+                    var user = message.From;
+                    // Отримуємо текст команди без самої команди
+                    string commandText = message.Text.Substring("/word".Length).Trim();
+
+                    // Перевіряємо, чи є текст команди не порожнім
+                    if (!string.IsNullOrWhiteSpace(commandText))
+                    {
+                        // Якщо /word має текст, відправляємо "Переслав модератору"
+                        await botClient.SendTextMessageAsync(
+                            message.Chat.Id,
+                            "Переслав модератору",
+                            replyToMessageId: message.MessageId
+                        );
+
+                        // Відправляємо оригінальне повідомлення в інший чат
+                        await botClient.SendTextMessageAsync(
+                            Chats.dirtyWords,
+                            $"Копія повідомлення від {user.FirstName} {user.LastName} \\({user.Username}\\) :\n```{commandText}```",
+                            parseMode: Telegram.Bot.Types.Enums.ParseMode.MarkdownV2
+                        );
+                    }
+                    else
+                    {
+                        // Якщо /word без тексту, відправляємо "добавте брудне слово."
+                        await botClient.SendTextMessageAsync(
+                            message.Chat.Id,
+                            "добавте брудне слово.",
+                            replyToMessageId: message.MessageId
+                        );
+                    }
+                }
+
                 // /traitor рандомний пошук юзера із 
                 if (message.Text.ToLower().Contains("/traitor"))
                 {
                     var random = new Random();
 
-                    if (message.Chat.Id == -1001902063585) // dampTest
+                    if (message.Chat.Id == Chats.dampTest)
                     {
                         var userCount = chatUsers.DumpTestUsers.Count;
                         if (userCount > 0)
@@ -165,7 +201,7 @@ internal class Program
                                 );
                         }
                     }
-                    else if (message.Chat.Id == -1001765136934) // naPivch
+                    else if (message.Chat.Id == Chats.naPivch)
                     {
                         var userCount = chatUsers.NaPivchUsers.Count;
                         if (userCount > 0)
@@ -292,7 +328,8 @@ internal class Program
                             "\n/traitor - знаходжу зрадника" +
                             "\n/banka - повідомляю посилання на банку" +
                             "\n/roll - у кого більший той і прав" +
-                            "\n/duel - Камінь, ножникі, папір",
+                            "\n/duel - Камінь, ножникі, папір" +
+                            "\n/word - після команди добавте <Брудне> слово щоб передати його модератору",
                             replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
                         );
                 }
@@ -308,10 +345,10 @@ internal class Program
         // Отримати chat_id чату, в який ви хочете відправити повідомлення про помилку
         var chatIds = new List<long>
         {
-            -1001765136934, // naPivch
-            -1001902063585 // dampTest
+            Chats.naPivch,
+            Chats.dampTest
         };
 
-        foreach (var chatId in chatIds) await botClient.SendTextMessageAsync(chatId, $"Помилка: {error.Message}");
+        foreach (var chatId in chatIds) await botClient.SendTextMessageAsync(chatId, $"УпсіДупсі! Помилка: {error.Message} " + userNameNaPivch.sashakuzo);
     }
 }
