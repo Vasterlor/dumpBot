@@ -4,6 +4,7 @@ FileStorage/
 bin/
 obj/
 .idea/
+.vs/
 latest/
 /env-vars.bat
 *.suo
@@ -60,3 +61,6 @@ NuGet/
 *.DotSettings.user
 
 
+/.vs/slnx.sqlite
+/dumpBot/obj/Debug/net7.0/dumpBot.AssemblyInfo.cs
+/dumpBot/obj/Debug/net7.0/dumpBot.AssemblyInfoInputs.cache
