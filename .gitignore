@@ -62,3 +62,5 @@ NuGet/
 
 
 /.vs/slnx.sqlite
+/dumpBot/obj/Debug/net7.0/dumpBot.AssemblyInfo.cs
+/dumpBot/obj/Debug/net7.0/dumpBot.AssemblyInfoInputs.cache
