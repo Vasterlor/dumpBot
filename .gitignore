@@ -4,6 +4,7 @@ FileStorage/
 bin/
 obj/
 .idea/
+.vs/
 latest/
 /env-vars.bat
 *.suo
@@ -60,3 +61,4 @@ NuGet/
 *.DotSettings.user
 
 
+/.vs/slnx.sqlite
