@@ -8,5 +8,5 @@
 /.vs/dumpBot/v17/.futdcache.v2
 /.vs/dumpBot/v17/.wsuo
 # Ignore bin\Debug\net7 directory
-\bin\Debug\net7.0
-\obj\Debug\net7.0
+/bin
+/obj
