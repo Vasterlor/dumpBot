@@ -37,7 +37,7 @@ internal class Program
         };
         //DumpTestUsers
         chatUsers.AddDumpTestUser(userNameDumpTest.sashakuzo);
-        chatUsers.AddDumpTestUser(userNameDumpTest.tod993);
+        chatUsers.AddDumpTestUser(userNameDumpTest.fourten);
 
         //NaPivchUsers
         chatUsers.AddNaPivchUser(userNameNaPivch.sashakuzo);
@@ -267,7 +267,7 @@ internal class Program
                         "пизда", "пізда", "піздато", "пізди", "пизди", "піздабол", "пиздабол", "пиздець", "піздєц", "пздц", "пиздеж", "пиздежа", "напиздів",
                         "мудло", "мудак", "сука", "ссука", "пиздів", "їбані", "допиздівся", "мля", "хуях",
                         "сучка", "сучара", "конча", "кончений", "кончена", "мудило", "курва",
-                        "курвище",
+                        "курвище", "xyй",
                         "курвий", "курви", "вкурвлювати", "yobana", "blyad", "найобуєте", "найобуєш", "найобує", "наєбав", "найобував", "найобщик", "наїбав", "наїбали", "наїбалово", "їбали", "заїбали", "єбали", "заєбали", "наебалово",
                         "наёбуете", "наёбуеш", "наебал", "наёбщик"
                     };
