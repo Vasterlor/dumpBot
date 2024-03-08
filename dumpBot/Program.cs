@@ -42,7 +42,7 @@ internal class Program
         //NaPivchUsers
         chatUsers.AddNaPivchUser(userNameNaPivch.sashakuzo);
         chatUsers.AddNaPivchUser(userNameNaPivch.hroshko_p);
-        //chatUsers.AddNaPivchUser(userNameNaPivch.roonua1); //покинув канал
+        chatUsers.AddNaPivchUser(userNameNaPivch.roonua1);
         chatUsers.AddNaPivchUser(userNameNaPivch.Healermanrober);
         chatUsers.AddNaPivchUser(userNameNaPivch.Kostya);
         chatUsers.AddNaPivchUser(userNameNaPivch.Рузана);
@@ -66,7 +66,7 @@ internal class Program
             return;
 
         var message = update.Message;
-        if (message != null)
+        if (message != null && IsChatAllowed(message.Chat.Id))
         {
             var messageToReplyTo = message?.MessageId; //Отримуємо ID поточного повідомлення, на яке ми відповідаємо
             if (message != null && message.Text != null && message.Chat != null)
@@ -229,10 +229,11 @@ internal class Program
                 // Привітання
                 if (message.Text.ToLower().Contains("привіт"))
                     await botClient.SendTextMessageAsync(
-                        message.Chat.Id,
-                        "Привіт пупсик",
-                        replyToMessageId: messageToReplyTo // Вказуємо ID повідомлення, на яке відповідаємо
+                    message.Chat.Id,
+                    "Привіт пупсик",
+                    replyToMessageId: message.MessageId
                     );
+
 
                 if (message.Text.ToLower().Contains("путін"))
                     await botClient.SendTextMessageAsync(
@@ -261,11 +262,11 @@ internal class Program
                         "нихера", "похер", "похеру", "похуе", "хуярять", "хуярить", "хуярити", "хуяритиме", "нихуяж", "ніхуяж", "хуя",
                         "ахує", "охуї", "ахуї", "охуїв", "охуїваю", "хуіта", "уйобки", "кончені", "уєбани", "уєбан", "єбля", "йобля", "єбліще", "Наволоч", "Лярва",
                         "хуйня", "хуїта", "хуїту", "хуєт", "хєр", "пох", "піхуй", "пиздос", "заєбаний", "похую", "хуєта", "хуєту", "хуєтІ", "хитровиєбаний",
-                        "хуйло", "нах", "нахуй", "хуєсос", "хуєсоси", "підор", "підар", "підарам", "пидорі", "Пидарье", "Пидорье", "йобаний", "хуєфікатор", "йобана",
+                        "нах", "нахуй", "хуєсос", "хуєсоси", "підор", "підар", "підарам", "пидорі", "Пидарье", "Пидорье", "йобаний", "хуєфікатор", "йобана",
                         "єбана", "єбати", "ебаная", "Їбать", "їбуча", "єбать", "єбаний", "єбошить", "йбн", "заєбав", "заєбався", "заїбав", "доєбатись",
-                        "їбати", "їбаний", "єбанько", "їбанько", "хулі", "єбуть", "пиздять", "піздить", "сєбався", "нахуя", "доєбались", "хуєрі",
+                        "їбати", "їбаний", "єбанько", "їбанько", "хулі", "єбуть", "пиздять", "піздить", "сєбався", "нахуя", "доєбались", "хуєрі", "пиздюк", "єбе",
                         "пизда", "пізда", "піздато", "пізди", "пизди", "піздабол", "пиздабол", "пиздець", "піздєц", "пздц", "пиздеж", "пиздежа", "напиздів",
-                        "мудло", "мудак", "сука", "ссука", "пиздів", "їбані", "допиздівся", "мля", "хуях",
+                        "мудло", "мудак", "сука", "ссука", "пиздів", "їбані", "допиздівся", "мля", "хуях", "похуй", "ахуй", "пиздуй", "вйобаному",
                         "сучка", "сучара", "конча", "кончений", "кончена", "мудило", "курва",
                         "курвище", "xyй",
                         "курвий", "курви", "вкурвлювати", "yobana", "blyad", "найобуєте", "найобуєш", "найобує", "наєбав", "найобував", "найобщик", "наїбав", "наїбали", "наїбалово", "їбали", "заїбали", "єбали", "заєбали", "наебалово",
@@ -346,6 +347,14 @@ internal class Program
         }
     }
 
+    private static bool IsChatAllowed(long chatId)
+    {
+        // Перевіряємо, чи чат присутній у списку дозволених чатів з класу Chats
+        return chatId == Chats.naPivch
+            || chatId == Chats.dampTest
+            || chatId == Chats.dirtyWords;
+    }
+
 
     private static async Task Error(ITelegramBotClient botClient, Exception error, CancellationToken arg3)
     {
@@ -358,9 +367,9 @@ internal class Program
             Chats.dampTest
         };
 
-        foreach (var chatId in chatIds) 
+        foreach (var chatId in chatIds)
             await botClient.SendTextMessageAsync(
-                chatId, 
+                chatId,
                 $"УпсіДупсі! Помилка: {error.Message} " + userNameNaPivch.sashakuzo);
     }
 }
